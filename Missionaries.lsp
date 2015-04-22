@@ -1,8 +1,8 @@
 ; global variables
-(defvar M*)
-(defvar C*)
-(defvar Visited*)
-(defvar SolutionPath*)
+(defvar *M*)
+(defvar *C*)
+(defvar *Visited*)
+(defvar *SolutionPath*)
 
 ;load BFS/DFS routines from external file
 ;(load 'search)
@@ -10,8 +10,8 @@
 (defun main()
 	(cond
 		((= (length *args*) 2)	;condition
-			(setf M* (parse-integer (car *args*)) C* (parse-integer (cadr *args*))) ;e1
-			(Missionaries M* C*)	;e2
+			(setf *M* (parse-integer (car *args*)) *C* (parse-integer (cadr *args*))) ;e1
+			(Missionaries *M* *C*)	;e2
 		)
 		(t
 			(print "Generalized Missionaries and Cannibals Problem")
@@ -32,10 +32,10 @@
 			(return-from Missionaries nil)
 		)
 		(t	;Valid start state, initialize global variables
-			(setf M* M)
-			(setf C* C)
-			(setf Visited* nil)
-			(setf SolutionPath* nil)
+			(setf *M* M)
+			(setf *C* C)
+			(setf *Visited* nil)
+			(setf *SolutionPath* nil)
 		)
 	)
 	
@@ -51,7 +51,7 @@
 
 (defun goal-state (state)
 	(cond
-		((equal state (list M* C* 'R))
+		((equal state (list *M* *C* 'R))
 			;(print "SOLUTION FOUND!!!")
 			(return-from goal-state t)
 		)
@@ -63,10 +63,10 @@
 
 (defun recursive-dfs (state)
 	;Set state as visited
-	(push state Visited*)
+	(push state *Visited*)
 	
 	;Push state to SolutionPath
-	(push state SolutionPath*)
+	(push state *SolutionPath*)
 
 	
 		
@@ -80,20 +80,20 @@
 		
 	;If (car SolutionPath) == goal-state
 		;return-from recursive-dfs
-	(if (goal-state (car SolutionPath*)) (return-from recursive-dfs) t)
+	(if (goal-state (car *SolutionPath*)) (return-from recursive-dfs) t)
 	;Pop SolutionPath
-	(pop SolutionPath*)
+	(pop *SolutionPath*)
 )
 
 (defun print-solution()
-	(print SolutionPath*)
+	(print *SolutionPath*)
 )
 
 (defun generate-successors (state)
 	;Create a local scope so we can use some temporary variables
-	(let ((m-left (- M* (nth 0 state)))
+	(let ((m-left (- *M* (nth 0 state)))
 		  (m-right (nth 0 state))
-		  (c-left (- C* (nth 1 state)))
+		  (c-left (- *C* (nth 1 state)))
 		  (c-right (nth 1 state))
 		  (canoe (if (equal 'R (nth 2 state)) 'L 'R))	;Gives opposite bank
 		  (next-state nil)
@@ -126,9 +126,9 @@
 
 ;Returns the state resulting from moving 1 cannibal
 (defun move-cannibals (state n)
-	(let ((m-left (- M* (nth 0 state)))
+	(let ((m-left (- *M* (nth 0 state)))
 		  (m-right (nth 0 state))
-		  (c-left (- C* (nth 1 state)))
+		  (c-left (- *C* (nth 1 state)))
 		  (c-right (nth 1 state))
 		  (canoe (if (equal 'R (nth 2 state)) 'L 'R))
 		  (next-state nil))
@@ -160,9 +160,9 @@
 
 ;Returns the state resulting from moving 1 missionary
 (defun move-missionaries (state n)
-	(let ((m-left (- M* (nth 0 state)))
+	(let ((m-left (- *M* (nth 0 state)))
 		  (m-right (nth 0 state))
-		  (c-left (- C* (nth 1 state)))
+		  (c-left (- *C* (nth 1 state)))
 		  (c-right (nth 1 state))
 		  (canoe (if (equal 'R (nth 2 state)) 'L 'R))	;Gives opposite bank
 		  (next-state nil))
@@ -195,9 +195,9 @@
 
 ;Returns the state resulting from moving missionaries and cannibals
 (defun move-mc (state n)
-	(let ((m-left (- M* (nth 0 state)))
+	(let ((m-left (- *M* (nth 0 state)))
 		  (m-right (nth 0 state))
-		  (c-left (- C* (nth 1 state)))
+		  (c-left (- *C* (nth 1 state)))
 		  (c-right (nth 1 state))
 		  (canoe (if (equal 'R (nth 2 state)) 'L 'R))	;Gives opposite bank
 		  (next-state nil))
@@ -232,14 +232,14 @@
 (defun valid-state (state)
 	
 	;Set up all the local variables needed for easy checking
-	(let ((m-left (- M* (nth 0 state)))
+	(let ((m-left (- *M* (nth 0 state)))
 		  (m-right (nth 0 state))
-		  (c-left (- C* (nth 1 state)))
+		  (c-left (- *C* (nth 1 state)))
 		  (c-right (nth 1 state)))
 		
 		(cond
 			;If this state has been visited before return nil
-			((member state Visited* :test #'equal)
+			((member state *Visited* :test #'equal)
 				(return-from valid-state nil)
 			)
 			;If this state has too many cannibals on the left side, return nil
