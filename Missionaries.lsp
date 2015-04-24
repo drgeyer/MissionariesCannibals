@@ -1,6 +1,16 @@
 #|
- |CSC 461 Programming Languages
- |#
+ | Program Name: Fucntional Programming in Lisp Missionaries and Cannibals Puzzle
+ | Authors: Dylan Geyer, Chrissy Sorensen
+ | Class: CSC 461 Programming Languages
+ | Instructor: Dr. J. Weiss
+ | Date: Apr 27 2015
+ |
+ | Usage: clisp m-c m c (m=number of missionaries, c=number of canibals)
+ |
+ |
+ |
+ |
+ | |#
 
 ; global variables
 (defvar M*)
@@ -11,6 +21,21 @@
 ;load BFS/DFS routines from external file
 ;(load 'search)
 
+#|
+ | Function Name: Main()
+ | Description: The main function where the program starts. Checks for 
+ | three command line arguments, if so, stores the values into the given
+ | for number of missionaries and number of cannibals into respected
+ | globl variables and calls funtion "m-c" passing in the values.
+ |
+ | If invalid, the program prints out a usage statement
+ | to the console.
+ |
+ | Parameters: None.
+ |
+ |#
+
+
 (defun main()
 	(cond
 		((= (length *args*) 2)	;condition
@@ -18,22 +43,36 @@
 			(m-c M* C*)	;e2
 		)
 		(t
-			(print "Generalized Missionaries and Cannibals Problem")
-			(print "----------- ------------ --- --------- -------")
-			(print "Usage: (Missionaries M C)")
-			(print "		M - Missionaries")
-			(print "		C - Cannibals")
+			(format t "Generalized Missionaries and Cannibals Problem~%")
+			(format t "----------- ------------ --- --------- -------~%")
+			(format t "Usage: (Missionaries M C)~% ~C M - Missionaries~% ~C C - Cannibals" #\tab #\tab)
 		)
 	)
 	
 )
 
+#|
+ | Function Name: m-c
+ | 
+ | Description: Checks the conditions of the values. If there is more
+ | cannibals than missionaries, the program prints out an error to the console
+ | and returns. If not, it sets the global variables for missionaries and
+ | cannibals to the values passed in, sets the Visted list to nil, sets the
+ | SoulutionPath to nil. It calls start-state and then passes the return into
+ | recursive-dfs function. Once that returns, the function calls the print-
+ | solution to print the solution path.
+ |
+ | Parameters: 
+ | M - number of missionaries
+ | C - number of cannibals
+ | 
+ |#
 ;Assuming all Missionaries/Cannibals start on left bank with canoe
 (defun m-c (M C)
 	;Check to make sure the start state is valid
 	(cond
-		((> C M)	;Condition 1 (There are more cannibals than missionaries
-			(print "There are too many cannibals at the start. No solution.")
+		((and (> C M)(> M 0)) 	;Condition 1 (There are more cannibals than missionaries
+			(format t "There are too many cannibals at the start. No solution.")
 			(return-from m-c (values))
 		)
 		(t	;Valid start state, initialize global variables
@@ -52,12 +91,29 @@
 	(return-from m-c (values))
 )
 
+#|
+ | Function Name: start-state
+ | 
+ | Description: Sets the start state to empty missionaries and cannibals on the
+ | right side.
+ | 
+ | Parameters: none
+ |
+ |#
+
 (defun start-state () '(0 0 L))
 
+#|
+ | Function Name: goal-state
+ | 
+ | Description:
+ | 
+ | Parameters:
+ |
+ |#
 (defun goal-state (state)
 	(cond
 		((equal state (list M* C* 'R))
-			;(print "SOLUTION FOUND!!!")
 			(return-from goal-state t)
 		)
 		(t
@@ -66,6 +122,12 @@
 	)
 )
 
+#|
+ | Function Name: recursive-dfs
+ | Description:
+ | Parameters:
+ |
+ |#
 (defun recursive-dfs (state)
 	;Set state as visited
 	(push state Visited*)
@@ -90,6 +152,12 @@
 	(pop SolutionPath*)
 )
 
+#|
+ | Function Name: print-solution
+ | Description:
+ | Parameters"
+ |
+ |#
 (defun print-solution()
 	(format t "~d Missionaries and ~d Canibals: ~%" M* C* )
 	(format t  "left bank~Cright bank~Ccanoe~Clast move ~%" #\tab #\tab #\tab)
@@ -101,6 +169,13 @@
 		(setf prev-state next-state)
         )
 )
+
+#|
+ | Function Name: print-steps
+ | Description:
+ | Parameters:
+ |
+ |#
 
 (defun print-steps( state prev-state )
        ;Create a local scope so we can use some temporary variables
@@ -115,15 +190,14 @@
 		(format t "~d M, ~d C ~C~d M, ~d C ~C~s~C" m-left c-left #\tab m-right c-right #\tab canoe #\tab)
 		(cond
 			((equal state prev-state) (format t "start position~%") nil)
-			((goal-state state) (format t "final position~%") nil)
 			(t
 				(let ((dif-m nil)
 					(dif-c nil))
 					(format t "move")
 					(setf dif-m (abs (- m-right m-prev-right)))
 					(setf dif-c (abs (- c-right c-prev-right)))
-					(if (and(> dif-m 0) (equal 0 dif-c))(format t " ~d M" dif-m) (format t " ~d M," dif-m))
-					(if (> dif-c 0) (format t " ~d C" dif-c) nil )
+					(format t " ~d M," dif-m)
+					(format t " ~d C" dif-c)
 					(if (equal canoe 'left) (format t " right to left~%") (format t " left to right~%"))
 				)
 
@@ -134,6 +208,12 @@
 	
 )
 
+#|
+ | Function Name:
+ | Description:
+ | Parameters:
+ |
+ |#
 (defun generate-successors (state)
 	;Create a local scope so we can use some temporary variables
 	(let ((m-left (- M* (nth 0 state)))
@@ -169,6 +249,13 @@
 	)
 )
 
+#|
+ | Function Name: move-cannibals
+ | Description:
+ | Parameters:
+ |
+ |#
+
 ;Returns the state resulting from moving 1 cannibal
 (defun move-cannibals (state n)
 	(let ((m-left (- M* (nth 0 state)))
@@ -202,6 +289,13 @@
 		)
 	)
 )
+
+#|
+ | Function Name: move-missionaries
+ | Description:
+ | Parameters:
+ |
+ |#
 
 ;Returns the state resulting from moving 1 missionary
 (defun move-missionaries (state n)
@@ -238,6 +332,13 @@
 	)
 )
 
+#|
+ | Function: move-mc
+ | Description:
+ | Parameters:
+ |
+ |#
+
 ;Returns the state resulting from moving missionaries and cannibals
 (defun move-mc (state n)
 	(let ((m-left (- M* (nth 0 state)))
@@ -272,6 +373,13 @@
 		)
 	)
 )
+
+#|
+ | Function Name: valid-state
+ | Description:
+ | Parameters:
+ |
+ |#
 
 ;Returns true if Missionaries are safe, nil if they get eaten
 (defun valid-state (state)
