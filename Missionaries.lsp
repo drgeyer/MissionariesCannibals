@@ -5,6 +5,10 @@
  | Instructor: Dr. J. Weiss
  | Date: Apr 27 2015
  |
+ | Descriptions:	This program solves the generalized verison of the missionaries and cannibals
+ |					Problem and allows the user to specify how many Missionaries / Cannibals start
+ |					on the left bank.
+ |
  | Usage: clisp m-c m c (m=number of missionaries, c=number of canibals)
  |
  |
@@ -23,6 +27,7 @@
 
 #|
  | Function Name: Main()
+ |
  | Description: The main function where the program starts. Checks for 
  | three command line arguments, if so, stores the values into the given
  | for number of missionaries and number of cannibals into respected
@@ -33,6 +38,7 @@
  |
  | Parameters: None.
  |
+ | Returns: None.
  |#
 
 
@@ -66,6 +72,8 @@
  | M - number of missionaries
  | C - number of cannibals
  | 
+ | Returns:
+ | values - prevents NIL from being printed
  |#
 ;Assuming all Missionaries/Cannibals start on left bank with canoe
 (defun m-c (M C)
@@ -94,22 +102,29 @@
 #|
  | Function Name: start-state
  | 
- | Description: Sets the start state to empty missionaries and cannibals on the
+ | Description: Sets the start state to Zero missionaries and cannibals on the
  | right side.
  | 
  | Parameters: none
  |
+ | Returns:
+ | List (0 0 L) meaning 0 Cannibals, 0 Missionaries, Canoe on LEFT bank
  |#
-
 (defun start-state () '(0 0 L))
 
 #|
  | Function Name: goal-state
  | 
- | Description:
+ | Description: This function determines whether or not the passed in State
+ |				is equivalent to the Goal-State. It returns true if it is,
+ |				and NIL if it is not.
  | 
  | Parameters:
+ |	state - state to be compared to GOAL
  |
+ | Returns:
+ | t - state == goal-state
+ | NIL - state != goal-state
  |#
 (defun goal-state (state)
 	(cond
@@ -123,10 +138,19 @@
 )
 
 #|
- | Function Name: recursive-dfs
- | Description:
- | Parameters:
+ | Function Name:	recursive-dfs
  |
+ | Description:	This functions performs a recursive depth first search
+ |				on the graph generated using the Missionaries and Cannibals
+ |				rules. To prevent loops, this dfs pushes visited states onto
+ |				a visited list, and states on the solution path are saved on
+ |				a solution path list.
+ |
+ | Parameters:	
+ |  state - current state
+ |
+ | Returns:	
+ |  None.
  |#
 (defun recursive-dfs (state)
 	;Set state as visited
@@ -153,10 +177,21 @@
 )
 
 #|
- | Function Name: print-solution
- | Description:
- | Parameters"
+ | Function Name:	print-solution
  |
+ | Description:	Once the recursive-dfs has finished runnign and the
+ |				SolutionPath list has been populated, we need to print
+ |				this path out in a way the user can understand. We begin
+ |				by displaying the number of Missionaries/Cannibals on the
+ |				Left bank, then the Right bank. Then we tell how many Missionaries
+ |				and Cannibals moved in which direction to get from the previous
+ |				state to the current state. 
+ |
+ | Parameters:
+ |	None.
+ |
+ | Returns:	
+ |	None.
  |#
 (defun print-solution()
 	(format t "~d Missionaries and ~d Canibals: ~%" M* C* )
@@ -171,12 +206,20 @@
 )
 
 #|
- | Function Name: print-steps
- | Description:
- | Parameters:
+ | Function Name:	print-steps
  |
+ | Description:	This function prints an individual state along the solution path.
+ |				it is responsible for determining how many C and M are on each bank
+ |				and the difference between the C and M from the previous and current
+ |				state.
+ |
+ | Parameters:
+ |	state - current state along the solution path
+ |	prev-state - previous state along the solution path
+ |
+ | Returns:	
+ |	None.
  |#
-
 (defun print-steps( state prev-state )
        ;Create a local scope so we can use some temporary variables
         (let ((m-left (- M* (nth 0 state)))
@@ -209,10 +252,17 @@
 )
 
 #|
- | Function Name:
- | Description:
- | Parameters:
+ | Function Name:	generate-successors
  |
+ | Description:	This function will generate all possible next states given
+ |				a current state. It will only return states that are valid
+ |				i.e. havent been visited before, and the missionaries are safe.
+ |
+ | Parameters:
+ |	state - current state to take 1 step from
+ |
+ | Returns:	
+ |	successors - list of successor states that we can go to from current state
  |#
 (defun generate-successors (state)
 	;Create a local scope so we can use some temporary variables
@@ -226,7 +276,7 @@
 		
 		;Move 1 Cannibal
 		(setf next-state (move-cannibals state 1))
-		(if next-state (push next-state successors) nil)
+		(if next-state (push next-state successors) nil) ;if next-state is non-nil push it to list of successors
 		
 		;Move 1 Missionary
 		(setf next-state (move-missionaries state 1))
@@ -250,13 +300,19 @@
 )
 
 #|
- | Function Name: move-cannibals
- | Description:
- | Parameters:
+ | Function Name:	move-cannibals
  |
+ | Description:	This function moves n cannibals from one bank to the other depending
+ |				on where the canoe is in state. For this program n is limited to 1 or
+ |				2, but can actually be any number.
+ |
+ | Parameters:	
+ |	state - current state of the missionaries, cannibals, canoe
+ |	n - number of cannibals to move from canoe-side to noncanoe-side
+ |
+ | Returns:	
+ |	next-state - result of moving n cannibals to the side that doesnt have the canoe
  |#
-
-;Returns the state resulting from moving 1 cannibal
 (defun move-cannibals (state n)
 	(let ((m-left (- M* (nth 0 state)))
 		  (m-right (nth 0 state))
@@ -291,13 +347,19 @@
 )
 
 #|
- | Function Name: move-missionaries
- | Description:
- | Parameters:
+ | Function Name:	move-missionaries
  |
+ | Description:	This function moves n missionaries from one bank to the other depending
+ |				on where the canoe is in state. For this program n is limited to 1 or
+ |				2, but can actually be any number.
+ |
+ | Parameters:	
+ |	state - current state of the missionaries, cannibals, canoe
+ |	n - number of missionaries to move from canoe-side to noncanoe-side
+ |
+ | Returns:	
+ |	next-state - result of moving n missionaries to the side that doesnt have the canoe
  |#
-
-;Returns the state resulting from moving 1 missionary
 (defun move-missionaries (state n)
 	(let ((m-left (- M* (nth 0 state)))
 		  (m-right (nth 0 state))
@@ -333,13 +395,18 @@
 )
 
 #|
- | Function: move-mc
- | Description:
- | Parameters:
+ | Function Name:	move-mc
  |
+ | Description:	This function moves n Missionaries AND Cannibals from the side with the canoe
+ |				to the side without the canoe based on state. This program will only ever call
+ |				this function with n = 1, but this can be any number.
+ |
+ | Parameters:
+ |	state - contains number of missionaries/cannibals  on right bank, location of canoe
+ |
+ | Returns:	
+ |	next-state - result of moving n cannibals from side with canoe to side without canoe
  |#
-
-;Returns the state resulting from moving missionaries and cannibals
 (defun move-mc (state n)
 	(let ((m-left (- M* (nth 0 state)))
 		  (m-right (nth 0 state))
@@ -375,13 +442,20 @@
 )
 
 #|
- | Function Name: valid-state
- | Description:
- | Parameters:
+ | Function Name:	valid-state
  |
+ | Description:	This function just determines whether or not a given state
+ |				is valid, i.e. The number of cannibals on a bank is never
+ |				greater than the missionaries, the state has not already
+ |				been visited.
+ |
+ | Parameters:
+ |	state - the state to be tested for validity
+ |
+ | Returns:	
+ |	t - state is valid, we may move to it
+ |	NIL - state is invalid for one of many reasons.
  |#
-
-;Returns true if Missionaries are safe, nil if they get eaten
 (defun valid-state (state)
 	
 	;Set up all the local variables needed for easy checking
@@ -417,4 +491,5 @@
 	)
 )
 
+;Now that all functions are defined, call main
 (main)
